@@ -1,0 +1,15 @@
+
+{
+  "include": "injects.ts",
+  "extension": ".ts",
+  "require": "ts-node/register",
+  "reporter": [
+    "json",
+    "text-summary",
+    "html"
+  ],
+  "sourceMap": true,
+  "instrument": true,
+  "report-dir": "./docs/test/coverage",
+  "all": true
+}

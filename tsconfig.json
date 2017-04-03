@@ -1,0 +1,14 @@
+
+{
+  "compilerOptions": {
+    "lib": ["es2015", "dom"],
+    "target": "es6",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "removeComments": false,
+    "outDir": "./build"
+  },
+  "files": ["injects.ts"]
+}

@@ -1,0 +1,447 @@
+// tag::content[]
+// tag::header[]
+= injects
+:toc: left
+:toc-title: Dependency Injection for TypeScript
+:toclevels: 4
+:source-highlighter: pygments
+:icons: font
+:build-doc-dir: docs
+:linkattrs:
+v1.0.0, April 3, 2017
+
+// end::header[]
+
+// tag::links[]
+
+// All links of documentation
+
+:link-webpack: https://github.com/webpack/webpack[webpack, window="_blank"]
+:link-asciidoctor: https://github.com/asciidoctor[asciidoctor, window="_blank"]
+:link-typedoc: https://github.com/TypeStrong/typedoc[typedoc, window="_blank"]
+:link-mocha: https://github.com/mochajs/mocha[mocha, window="_blank"]
+:link-chai: https://github.com/chaijs/chai[chai, window="_blank"]
+:link-mocha-simple-html-reporter: https://github.com/blond/mocha-simple-html-reporter[mocha-simple-html-reporter, window="_blank"]
+:link-nyc: https://github.com/istanbuljs/nyc[nyc, window="_blank"]
+:link-rimraf: https://github.com/isaacs/rimraf[rimraf, window="_blank"]
+:link-tslint: https://github.com/palantir/tslint[tslint, window="_blank"]
+
+// end::links[]
+
+// tag::body[]
+
+https://mickgrz.github.io/injects/
+
+[sidebar]
+.Dependency Injection for TypeScript
+--
+--
+
+== Use case
+
+Use a class instance without instantiate it.
+
+The responsibility of providing dependency is delegated to an injector.
+
+This separates the responsibilities of usages and construction.
+
+This also improves readability, testability & maintainability.
+
+// end::index[]
+
+=== Example
+
+[source%nowrap,ts,linenums]
+.Dao.ts
+----
+class Dao {
+    public create(entity: any) {
+        [...]
+    }
+}
+----
+
+[cols="2"]
+|===
+a|
+[source%nowrap,ts,linenums]
+.Service.ts
+----
+import {inject} from 'injects'; #<1>
+import Dao from './Dao';
+
+class Service {
+
+  private dao: Dao;
+
+  constructor() {
+    this.dao = inject(Dao); #<2>
+  }
+
+  public create(entity: any) {
+    return this.dao.create(entity);
+  }
+}
+----
+a|
+[TIP]
+--
+<1> imports inject function
+<2> inject instance of Dao class
+--
+|===
+
+[source%nowrap,ts,linenums]
+----
+const service: Service = new Service();
+service.create({ entityId: 1 });// will call dao.create
+----
+
+You can also write :
+
+[source%nowrap,ts,linenums]
+----
+import {inject} from 'injects';
+import Dao from './Dao';
+
+class Service {
+
+  private dao: Dao = inject(Dao);
+
+  public create(entity: any) {
+    return this.dao.create(entity);
+  }
+}
+----
+
+=== Unit test example
+
+Stubbing dependency is easy :
+
+[source%nowrap,ts,linenums]
+----
+import {Injectable} from 'injects';
+import * as sinon from 'sinon';
+
+Injectable('Dao', sinon.stub());
+const service: Service = new Service();// will get stub dependency
+service.create({ entityId: 1 });// will call the stub
+----
+
+Name of dependency's class is the key used when to register the dependency instance.
+
+== Installation
+
+```
+npm install --save injects
+```
+
+== Technical documentation
+
+=== Api
+
+==== inject
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=inject]
+----
+
+[TIP]
+--
+<1> parameter is used as key
+<2> class name is used as key
+<3> register new injectable class instance if it doesn't exist
+<4> return injectable indexed by key
+--
+
+==== Injectable
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=Injectable] 
+----
+
+==== injectables
+
+An in-memory registry (a map string:any) is used to 
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=injectables] 
+----
+
+==== exists
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=exists] 
+----
+
+==== resetInjectables
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=resetInjectables] 
+----
+
+==== resetInjectable
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[tags=resetInjectable] 
+----
+
+See <<injects.ts>>
+
+=== Lint
+
+Code is lint with {link-tslint}. See <<tslint.json>>
+
+    npm run lint
+
+=== Packaging
+
+Bundle is generated with {link-webpack}. See <<webpack.config.js>>
+
+    npm run build:bundle
+
+=== Documentation
+
+This technical documentation is generated with {link-asciidoctor}.
+
+    npm run build:doc:living
+
+==== Typescript documentation is available link:typedoc/index.html[here, window="_blank"]
+
+It's generated with {link-typedoc}.
+
+    npm run build:doc:typedoc
+
+=== Tests
+
+Tests run with {link-mocha}.
+
+    npm run test
+
+Assertions are wrote with {link-chai}, using the *expect syntax*.
+
+See <<injects.spec.ts>>
+
+==== Execution report is available link:test/index.html[here, window="_blank"]
+
+It's generated with {link-mocha-simple-html-reporter}.
+
+    npm run test:report
+
+++++
+include::{build-doc-dir}/test/index.html[]
+++++
+
+==== Coverage report is available link:test/coverage/index.html[here, window="_blank"]
+
+It's generated with {link-nyc}.
+
+    npm run test:report
+
+See <<nycrc>> config file.
+
+==== Unit tests
+
+===== should register dependency
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldRegisterDependency] 
+----
+
+===== should inject dependency
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectDependency] 
+----
+
+===== should inject class dependency
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectClassDependency] 
+----
+
+===== should inject custom object instance
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectCustomObjectInstance] 
+----
+
+===== should inject custom class instance
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectCustomClassInstance] 
+----
+
+===== should throw assert exception when creating injectable with custom string key but without instance
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldThrowAssertExceptionWhenCreatingInjectableWithCustomStringKeyButWithoutInstance] 
+----
+
+===== should inject string
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectString] 
+----
+
+===== should inject number
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectNumber] 
+----
+
+===== should register @Injectable
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldRegister@Injectable] 
+----
+
+===== should inject in cascade
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldInjectInCascade] 
+----
+
+===== should reset injectables
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldResetInjectables] 
+----
+
+===== should reset injectable
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[tags=shouldResetInjectable] 
+----
+
+=== Development
+
+==== Prerequisites
+
+* {link-asciidoctor}
+
+==== Npm scripts
+
+* **clean** : remove build/ directory with {link-rimraf}
+* **lint** : lint source directory with {link-tslint}. See <<tslint.json>>
+* **test** : run tests with {link-mocha} & {link-chai}
+* **test:report** : run tests with {link-nyc} over {link-mocha} with {link-mocha-simple-html-reporter}. See <<nycrc>>
+* **build:typedoc** : build typescript documentation with {link-typedoc}
+* **build:asciidoc** : build this documentation with {link-asciidoctor}. See <<index.adoc>>
+* **build:doc** : alias for build:doc:*
+* **build:prepare** : alias for clean, lint, test:report, build:doc
+* **build:bundle** : create bundle with {link-webpack}. See <<webpack.config.js>> & <<tsconfig.json>>
+* **build** : alias for build:prepare & build:bundle
+
+See <<package.json>>
+
+==== Files
+
+[[package.json]]
+===== package.json
+
+[source%nowrap,json,linenums]
+----
+include::package.json[]
+----
+
+[[injects.ts]]
+===== injects.ts
+
+[source%nowrap,ts,linenums]
+----
+include::injects.ts[]
+----
+
+[[tslint.json]]
+===== tslint.json
+
+[source%nowrap,json,linenums]
+----
+include::tslint.json[]
+----
+
+[[injects.spec.ts]]
+===== injects.spec.ts
+
+[source%nowrap,ts,linenums]
+----
+include::injects.spec.ts[]
+----
+
+[[nycrc]]
+===== .nycrc
+
+[source%nowrap,json,linenums]
+----
+include::.nycrc[]
+----
+
+[[webpack.config.js]]
+===== webpack.config.js
+
+[source%nowrap,js,linenums]
+----
+include::webpack.config.js[]
+----
+
+[[tsconfig.json]]
+===== tsconfig.json
+
+[source%nowrap,json,linenums]
+----
+include::tsconfig.json[]
+----
+
+[[editorconfig]]
+===== .editorconfig
+
+[source%nowrap,editorconfig,linenums]
+----
+include::.editorconfig[]
+----
+
+[[gitignore]]
+===== .gitignore
+
+[source%nowrap,gitignore,linenums]
+----
+include::.gitignore[]
+----
+
+[[readme.md]]
+===== readme.md
+
+[source%nowrap,markdown,linenums]
+----
+include::readme.md[]
+----
+
+// end::body[]
+// end::content[]
+
+[[index.adoc]]
+===== index.adoc
+
+[source%nowrap,asciidoctor,linenums]
+....
+include::documentation[tags=content]
+....

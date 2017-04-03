@@ -1,0 +1,65 @@
+{
+  "name": "injects",
+  "version": "1.0.0",
+  "description": "Dependency Injection for Typescript",
+  "author": "mickgrz",
+  "main": "./build/injects.js",
+  "typings": "./build/injects.d.ts",
+  "scripts": {
+    "clean": "rimraf build/* && rimraf docs/* && mkdir -p docs/test",
+    "lint": "tslint injects.ts injects.spec.ts",
+    "test": "./node_modules/.bin/mocha --reporter spec --compilers ts:ts-node/register injects.spec.ts",
+    "test:report": "./node_modules/.bin/nyc ./node_modules/.bin/mocha --reporter mocha-simple-html-reporter --reporter-options output=docs/test/index.html --compilers ts:ts-node/register --require source-map-support/register --full-trace --bail injects.spec.ts",
+    "build:typedoc": "./node_modules/.bin/typedoc --theme minimal --readme none --name 'injects' --out docs/typedoc --mode file --exclude injects.spec.ts",
+    "build:asciidoc": "asciidoctor -a linkcss -r asciidoctor-diagram documentation -o docs/index.html",
+    "build:doc": "npm run build:typedoc && npm run build:asciidoc",
+    "build:prepare": "npm run clean && npm run lint && npm run test:report && npm run build:doc",
+    "build:bundle": "./node_modules/.bin/webpack --debug",
+    "build": "npm run build:prepare && npm run build:bundle",
+    "publish": "npm run build && npm publish"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.35",
+    "@types/mocha": "^2.2.39",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "mocha-simple-html-reporter": "^1.0.1",
+    "nyc": "^10.1.2-candidate.0",
+    "rimraf": "^2.6.0",
+    "source-map-loader": "^0.2.1",
+    "source-map-support": "^0.4.11",
+    "ts-loader": "^2.0.1",
+    "ts-node": "^2.1.0",
+    "tslint": "^4.4.2",
+    "tslint-loader": "^3.4.3",
+    "typedoc": "^0.5.7",
+    "typescript": "^2.2.1",
+    "webpack": "^2.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mickgrz/injects.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mickgrz/injects/issues"
+  },
+  "homepage": "https://github.com/mickgrz/injects#readme",
+  "keywords": [
+    "injects",
+    "dependency",
+    "injection",
+    "ioc",
+    "clean",
+    "code",
+    "cleancode",
+    "typescript",
+    "tslint",
+    "mocha",
+    "chai",
+    "nyc",
+    "typedoc",
+    "webpack",
+    "asciidoctor",
+    "asciidoctor-diagram"
+  ]
+}
